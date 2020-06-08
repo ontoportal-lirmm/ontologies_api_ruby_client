@@ -3,3 +3,6 @@ config/config.rb
 *.gem
 
 .DS_Store
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/ontologies_api_ruby_client/v15/.suo
