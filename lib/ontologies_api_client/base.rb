@@ -28,6 +28,7 @@ module LinkedData
       def self.map_classes
         map = {}
         classes = LinkedData::Client::Models.constants.map {|c| LinkedData::Client::Models.const_get(c)}
+        #LOGGER.debug("  ONTOLOGIES_API_RUBY_CLIENT - LinkedData::Client::Base -> map_classes: \n\nclasses=#{classes.inspect}")
         classes.each do |media_type_cls|
           next if map[media_type_cls] || !media_type_cls.respond_to?(:media_type) || !media_type_cls.ancestors.include?(LinkedData::Client::Base)
           map[media_type_cls.media_type] = media_type_cls
@@ -37,13 +38,19 @@ module LinkedData
       end
 
       def initialize(options = {})
-        read_only = options.delete(:read_only) || false
-        values = options[:values]
-        if values.is_a?(Hash) && !values.empty?
-          create_attributes(values.keys)
-          populate_attributes(values)
+        #LOGGER.debug("\n\n ============ RUBY API - base.rb - initialize(options) -> options = #{options}")
+        begin
+          read_only = options.delete(:read_only) || false
+          values = options[:values]
+          if values.is_a?(Hash) && !values.empty?
+            create_attributes(values.keys)
+            populate_attributes(values)
+          end
+          create_attributes(self.class.attrs_always_present || [])
+        rescue => e
+          LOGGER.debug("\n\n ECCEZIONE! RUBY API - base.rb - initialize(options): #{e.message}\n#{e.backtrace.join("\n")}")
+          raise e
         end
-        create_attributes(self.class.attrs_always_present || [])
       end
 
       def id

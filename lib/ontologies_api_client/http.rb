@@ -59,6 +59,8 @@ module LinkedData
 
         begin
           puts "Getting: #{path} with #{params}" if $DEBUG
+
+          # LOGGER.debug("\n\n RUBY API - LinkedData::Client::HTTP ->Get: #{path} with:\n    > params:#{params.inspect}\n    > options:#{options.inspect}  ")
           begin
             response = conn.get do |req|
               req.url path
@@ -103,17 +105,24 @@ module LinkedData
       end
 
       def self.post(path, obj, options = {})
-        file, file_attribute = params_file_handler(obj)
-        response = conn.post do |req|
-          req.url path
-          custom_req(obj, file, file_attribute, req)
+        begin
+          # LOGGER.debug("\n\n RUBY API - LinkedData::Client::HTTP ->post: with:\n    > path:#{path} \n    > obj:#{obj.inspect}\n    > options:#{options.inspect}  ")
+          file, file_attribute = params_file_handler(obj)
+          response = conn.post do |req|
+            req.url path
+            custom_req(obj, file, file_attribute, req)
+          end
+          raise Exception, response.body if response.status >= 500
+          if options[:raw] || false # return the unparsed body of the request
+            return response.body
+          else
+            return recursive_struct(load_json(response.body))
+          end
+        rescue => e
+          LOGGER.debug "\n\n\nRUBY API - LinkedData::Client::HTTP ->post: - ECCEZIONE: #{e.message}\n#{e.backtrace.join("\n")}"
+          raise e        
         end
-        raise Exception, response.body if response.status >= 500
-        if options[:raw] || false # return the unparsed body of the request
-          return response.body
-        else
-          return recursive_struct(load_json(response.body))
-        end
+
       end
 
       def self.put(path, obj)
@@ -194,6 +203,7 @@ module LinkedData
       end
 
       def self.recursive_struct(json_obj)
+        # LOGGER.debug("ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::HTTP::Links -> recursive_struct:\n\n json_obj=#{json_obj.inspect}")
         # TODO: Convert dates to date objects
         if json_obj.is_a?(Hash)
           return if json_obj.empty?
@@ -206,7 +216,8 @@ module LinkedData
           attributes = json_obj.keys.map {|k| k.to_sym}
           attributes_always_present = value_cls.attrs_always_present || [] rescue []
           attributes = (attributes + attributes_always_present).uniq
-
+          
+          #LOGGER.debug("ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::HTTP::Links -> recursive_struct:\n\n value_cls=#{value_cls.inspect}")
           # Add attributes to instance
           if value_cls
             instance = value_cls.new
@@ -237,6 +248,7 @@ module LinkedData
             json_obj.each do |key, value|
               recursive_obj_hash[key] = recursive_struct(value)
             end
+            #LOGGER.debug("ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::HTTP::Links -> recursive_struct:\n\n new OpenStruct for recursive_obj_hash=#{recursive_obj_hash.inspect}")
             instance = OpenStruct.new(recursive_obj_hash)
           end
 

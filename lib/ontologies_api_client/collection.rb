@@ -91,6 +91,7 @@ module LinkedData
         ##
         # Find a resource by a combination of attributes
         def find_by(attrs, *args)
+          # LOGGER.debug("\n\n ============ RUBY API - collection.rb - find_by")
           attributes = attrs.split("_and_")
           values_to_find = args.slice!(0..attributes.length-1)
           params = args.shift
