@@ -59,6 +59,8 @@ module LinkedData
 
         begin
           puts "Getting: #{path} with #{params}" if $DEBUG
+
+          # LOGGER.debug("\n\n RUBY API - LinkedData::Client::HTTP ->Get: #{path} with:\n    > params:#{params.inspect}\n    > options:#{options.inspect}  ")
           begin
             response = conn.get do |req|
               req.url path
@@ -103,17 +105,23 @@ module LinkedData
       end
 
       def self.post(path, obj, options = {})
-        file, file_attribute = params_file_handler(obj)
-        response = conn.post do |req|
-          req.url path
-          custom_req(obj, file, file_attribute, req)
+        begin
+          file, file_attribute = params_file_handler(obj)
+          response = conn.post do |req|
+            req.url path
+            custom_req(obj, file, file_attribute, req)
+          end
+          raise Exception, response.body if response.status >= 500
+          if options[:raw] || false # return the unparsed body of the request
+            return response.body
+          else
+            return recursive_struct(load_json(response.body))
+          end
+        rescue => e
+          LOGGER.debug "\n\n\nRUBY API - LinkedData::Client::HTTP ->post: - ECCEZIONE: #{e.message}\n#{e.backtrace.join("\n")}"
+          raise e        
         end
-        raise Exception, response.body if response.status >= 500
-        if options[:raw] || false # return the unparsed body of the request
-          return response.body
-        else
-          return recursive_struct(load_json(response.body))
-        end
+
       end
 
       def self.put(path, obj)
