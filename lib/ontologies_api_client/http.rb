@@ -62,6 +62,8 @@ module LinkedData
 
         begin
           puts "Getting: #{path} with #{params}" if $DEBUG
+
+          # LOGGER.debug("\n\n RUBY API - LinkedData::Client::HTTP ->Get: #{path} with:\n    > params:#{params.inspect}\n    > options:#{options.inspect}  ")
           begin
             response = conn.get do |req|
               req.url path
@@ -118,6 +120,7 @@ module LinkedData
         else
           recursive_struct(load_json(response.body))
         end
+
       end
 
       def self.put(path, obj)
