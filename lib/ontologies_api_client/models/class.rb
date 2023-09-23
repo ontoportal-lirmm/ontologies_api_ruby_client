@@ -1,4 +1,4 @@
-require "uri"
+require "cgi"
 require_relative "../base"
 
 module LinkedData
@@ -6,11 +6,10 @@ module LinkedData
     module Models
       class Class < LinkedData::Client::Base
         HTTP = LinkedData::Client::HTTP
-        @media_type = "http://www.w3.org/2002/07/owl#Class"
-        @include_attrs = "prefLabel,definition,synonym,obsolete,hasChildren"
-        @include_attrs_full = "prefLabel,definition,synonym,obsolete,properties,hasChildren,children"
-        @attrs_always_present = :prefLabel, :definition, :synonym, :obsolete, :properties, :hasChildren, :children
-
+        @media_type = %w[http://www.w3.org/2002/07/owl#Class http://www.w3.org/2004/02/skos/core#Concept]
+        @include_attrs = "prefLabel,definition,synonym,obsolete,hasChildren,inScheme,memberOf"
+        @include_attrs_full = "prefLabel,definition,synonym,obsolete,properties,hasChildren,childre,inScheme,memberOf"
+        @attrs_always_present = :prefLabel, :definition, :synonym, :obsolete, :properties, :hasChildren, :children, :inScheme, :memberOf
         alias :fullId :id
 
         # triple store predicate is <http://www.w3.org/2002/07/owl#deprecated>
@@ -48,7 +47,7 @@ module LinkedData
           return "" if self.links.nil?
           return self.id if self.id.include?("purl.")
           ont = self.explore.ontology
-          "#{LinkedData::Client.settings.purl_prefix}/#{ont.acronym}?conceptid=#{URI.escape(self.id, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}"
+          "#{LinkedData::Client.settings.purl_prefix}/#{ont.acronym}?conceptid=#{CGI.escape(self.id)}"
         end
 
         def ontology
@@ -57,7 +56,7 @@ module LinkedData
 
         def self.find(id, ontology, params = {})
           ontology = HTTP.get(ontology, params)
-          ontology.explore.class(URI.escape(id, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))
+          ontology.explore.class(CGI.escape(id))
         end
 
         def self.search(*args)

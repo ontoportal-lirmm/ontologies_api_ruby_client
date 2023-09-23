@@ -6,30 +6,17 @@ module LinkedData
     module ReadWrite
       HTTP = LinkedData::Client::HTTP
 
-      def save(options = {})        
-        begin
-          resp = HTTP.post(self.class.collection_path, self.to_hash)
-          # LOGGER.debug("\n\n ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::ReadWrite -> save : \n\n - resp -> #{resp}")
-        # cache_refresh_all allow to avoid to refresh everything, to make it faster when saving new submission
-        invalidate_cache(options[:cache_refresh_all] == false)
+      def save(options = {})
+        resp = HTTP.post(self.class.collection_path, self.to_hash)
+        cache_refresh(options)
         resp
-        rescue => e
-          LOGGER.debug("\n\nECCEZIONE! ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::ReadWrite - save()  #{e.message}\n#{e.backtrace.join("\n")}")
-          raise e
-        end
       end
 
       def update(options = {})
-        begin
-          values = options[:values] || changed_values()
-          return if values.empty?
-          resp = HTTP.patch(self.id, values)
-        # When updating submission we avoid refreshing all cache to avoid calling /submissions?display=all that takes a lot of time
-        invalidate_cache(options[:cache_refresh_all] == false)
-        rescue => e
-          LOGGER.debug("\n\n ECCEZIONE! ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::ReadWrite: #{e.message}\n#{e.backtrace.join("\n")}")
-          raise e
-        end
+        values = options[:values] || changed_values()
+        return if values.empty?
+        resp = HTTP.patch(self.id, values)
+        cache_refresh(options)
         resp
       end
 
@@ -50,30 +37,30 @@ module LinkedData
       end
 
       def changed_values
-        begin
-          existing = HTTP.get(self.id, include: "all")
-          changed_attrs = {}
-          self.instance_variables.each do |var|
-            var_sym = var[1..-1].to_sym
-            next if [:id, :type, :links, :context, :created].include?(var_sym)
-            new_value = self.instance_variable_get(var)
-            current_value = existing.instance_variable_get(var)
-            changed_attrs[var_sym] = new_value unless equivalent?(current_value, new_value)
-          end
-        rescue => e
-          LOGGER.debug("\n\nECCEZIONE! ONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::changed_values: #{e.message}\n#{e.backtrace.join("\n")}")
-          raise e
+        existing = HTTP.get(self.id, include: 'all')
+        changed_attrs = {}
+        self.instance_variables.each do |var|
+          var_sym = var[1..-1].to_sym
+          next if [:id, :type, :links, :context, :created].include?(var_sym)
+          new_value = self.instance_variable_get(var)
+          current_value = existing.instance_variable_get(var)
+          changed_attrs[var_sym] = new_value unless equivalent?(current_value, new_value)
         end
         changed_attrs
       end
 
       def delete
         resp = HTTP.delete(self.id)
-        invalidate_cache()
+        cache_refresh
         resp
       end
 
       private
+
+      def cache_refresh(options = {})
+        # cache_refresh_all allow to avoid to refresh everything, to make it faster when saving/updating a submission
+        invalidate_cache(options[:cache_refresh_all] || options[:cache_refresh_all].nil?)
+      end
 
       def equivalent?(current_value, new_value)
         # LOGGER.debug("\n\n----------------------\nONTOLOGIES_API_RUBY_CLIENT: LinkedData::Client::ReadWrite -> equivalent:\n\n    > current_value=#{current_value.inspect}\n\n    > new_value=#{new_value.inspect}")
