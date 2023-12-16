@@ -2,7 +2,7 @@ require 'oj'
 require 'multi_json'
 require 'digest'
 require 'ostruct'
-
+require 'benchmark'
 ##
 # This monkeypatch makes OpenStruct act like Struct objects
 class OpenStruct
@@ -58,18 +58,20 @@ module LinkedData
         raw = options[:raw] || false # return the unparsed body of the request
         params = params.delete_if { |k, v| v == nil || v.to_s.empty? }
         params[:ncbo_cache_buster] = Time.now.to_f if raw # raw requests don't get cached to ensure body is available
-        invalidate_cache = params.delete(:invalidate_cache) || false
-
+        invalidate_cache = params.delete(:invalidate_cache) || $API_CLIENT_INVALIDATE_CACHE || false
         begin
-          puts "Getting: #{path} with #{params}" if $DEBUG_API_CLIENT
           begin
-            response = conn.get do |req|
-              req.url path
-              req.params = params.dup
-              req.options[:timeout] = 60
-              req.headers.merge(headers)
-              req.headers[:invalidate_cache] = invalidate_cache
+            response = nil
+            time = Benchmark.realtime do
+              response = conn.get do |req|
+                req.url path
+                req.params = params.dup
+                req.options[:timeout] = 60
+                req.headers.merge(headers)
+                req.headers[:invalidate_cache] = invalidate_cache
+              end
             end
+            puts "Getting: #{path} with #{params} (#{time}s)" if $DEBUG_API_CLIENT
           rescue Exception => e
             params = Faraday::Utils.build_query(params)
             path << "?" unless params.empty? || path.include?("?")
