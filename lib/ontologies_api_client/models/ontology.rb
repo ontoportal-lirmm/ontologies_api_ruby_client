@@ -52,10 +52,6 @@ module LinkedData
           return administeredBy.any? {|u| u == user.id}
         end
 
-        def invalidate_cache(cache_refresh_all = true)
-          self.class.all(invalidate_cache: true, include_views: true)
-          super(cache_refresh_all)
-        end
 
         # ACL with administrators
         def full_acl
@@ -108,7 +104,7 @@ module LinkedData
         # Override to search for views as well by default
         # Views get hidden on the REST service unless the `include_views`
         # parameter is set to `true`
-        def find(id, params = {})
+        def self.find(id, params = {})
           params[:include_views] = params[:include_views] || true
           super(id, params)
         end
@@ -119,6 +115,9 @@ module LinkedData
           "acronym,administeredBy,group,hasDomain,name,notes,projects,reviews,summaryOnly,viewingRestriction"
         end
 
+        def self.find_by_acronym(acronym, params = {})
+          [find(acronym, params)]
+        end
       end
     end
   end
