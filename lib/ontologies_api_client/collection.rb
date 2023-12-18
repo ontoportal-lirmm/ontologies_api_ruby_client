@@ -75,16 +75,16 @@ module LinkedData
 
         ##
         # Find a resource by id
+        # @deprecated replace with "get"
         def find(id, params = {})
-          found = where do |obj|
-            obj.id.eql?(id)
-          end
-          found.first
+          [get(id, params)]
         end
 
         ##
         # Get a resource by id (this will retrieve it from the REST service)
         def get(id, params = {})
+          path = collection_path
+          id = "#{path}/#{id}" unless id.include?(path)
           HTTP.get(id, params)
         end
 

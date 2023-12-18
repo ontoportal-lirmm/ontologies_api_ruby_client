@@ -108,7 +108,7 @@ module LinkedData
         # Override to search for views as well by default
         # Views get hidden on the REST service unless the `include_views`
         # parameter is set to `true`
-        def find(id, params = {})
+        def self.find(id, params = {})
           params[:include_views] = params[:include_views] || true
           super(id, params)
         end
@@ -119,6 +119,9 @@ module LinkedData
           "acronym,administeredBy,group,hasDomain,name,notes,projects,reviews,summaryOnly,viewingRestriction"
         end
 
+        def self.find_by_acronym(acronym, params = {})
+          [find(acronym, params)]
+        end
       end
     end
   end
