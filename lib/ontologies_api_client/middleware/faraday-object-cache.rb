@@ -219,13 +219,6 @@ module Faraday
       request[:request_headers] = request[:request_headers].dup
       request
     end
-
-    def clean_request_headers(request)
-      request[:request_headers].delete("If-Modified-Since")
-      request[:request_headers].delete("Expect")
-      request
-    end
-
   end
 end
 
