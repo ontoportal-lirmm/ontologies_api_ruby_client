@@ -1,4 +1,5 @@
 require 'digest/sha1'
+require 'active_support'
 require 'active_support/cache'
 require 'lz4-ruby'
 require_relative '../http'
@@ -70,7 +71,7 @@ module Faraday
       env = { status: 304 }
       cached_response = ObjectCacheResponse.new(env)
       cached_response.parsed_body = ld_obj
-      cached_response.env.response_headers = { "x-rack-cache" => 'hit' }
+      cached_response.env.response_headers = { "X-Rack-Cache" => 'hit' }
       cached_response
     end
 
@@ -88,7 +89,7 @@ module Faraday
 
       response = ObjectCacheResponse.new(response_env)
       response.parsed_body = ld_obj
-      response.env.response_headers["x-rack-cache"] = cache_state
+      response.env.response_headers["X-Rack-Cache"] = cache_state
       response
     end
 
@@ -99,7 +100,7 @@ module Faraday
         cache_write(last_modified_key_id(request_key), last_modified)
         cache_write(request_key, stored_obj)
       end
-      stored_obj
+      stored_obj.is_a?(Hash) && stored_obj.key?(:ld_obj) ? stored_obj[:ld_obj] : stored_obj
     end
 
     def cache_response(response_env, request_key)
