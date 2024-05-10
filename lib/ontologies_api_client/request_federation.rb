@@ -16,7 +16,7 @@ module LinkedData
             begin
               HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), params, connection: conn)
             rescue StandardError => e
-              [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/'))}")]
+              [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/')) || conn.url_prefix}")]
             end
           end
 

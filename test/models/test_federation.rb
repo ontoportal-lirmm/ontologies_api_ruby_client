@@ -108,4 +108,15 @@ class FederationTest < LinkedData::Client::TestCase
     analytics = LinkedData::Client::Analytics.last_month
     refute_empty analytics.onts
   end
+
+
+  def test_federation_ssl_error
+    WebMock.enable!
+    WebMock.stub_request(:get, "#{LinkedData::Client.settings.rest_url.chomp('/')}")
+           .to_raise(Faraday::SSLError)
+    ontologies_federate_one = LinkedData::Client::Models::Ontology.all(display_links: false, display_context: false, invalidate_cache: true)
+
+    refute_nil ontologies_federate_one.first.errors
+    WebMock.disable!
+  end
 end

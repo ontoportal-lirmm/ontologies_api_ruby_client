@@ -46,7 +46,7 @@ module LinkedData
         def entry_point(media_type, params = {})
           params = { include: @include_attrs, display_links: false, display_context: false}.merge(params)
           federated_get(params) do |url|
-            uri_from_context(top_level_links(url), media_type)
+            uri_from_context(top_level_links(url), media_type) rescue nil
           end
         end
 
