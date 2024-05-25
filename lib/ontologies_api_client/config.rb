@@ -37,8 +37,22 @@ module LinkedData
 
     def config_connection(options = {})
       return if @settings_run_connection
-      store = options[:cache_store]
-      @settings.conn = Faraday.new(@settings.rest_url) do |faraday|
+      store = options[:cache_store] || ActiveSupport::Cache::MemoryStore.new
+      @settings.conn = faraday_connection(@settings.rest_url, @settings.apikey, store)
+      @settings.federated_conn = @settings.federated_portals.map do |portal_name, portal_info|
+        [portal_name, faraday_connection(portal_info[:api], portal_info[:apikey], store)]
+      end.to_h
+
+      @settings_run_connection = true
+    end
+
+    def connection_configured?
+      @settings_run_connection
+    end
+
+    private
+    def faraday_connection(url, apikey, store)
+      Faraday.new(url.to_s.chomp('/')) do |faraday|
         if @settings.enable_long_request_log
           require_relative 'middleware/faraday-long-requests'
           faraday.use :long_requests
@@ -69,15 +83,10 @@ module LinkedData
         faraday.adapter :excon
         faraday.headers = {
           "Accept" => "application/json",
-          "Authorization" => "apikey token=#{@settings.apikey}",
+          "Authorization" => "apikey token=#{apikey}",
           "User-Agent" => "NCBO API Ruby Client v0.1.0"
         }
       end
-      @settings_run_connection = true
-    end
-
-    def connection_configured?
-      @settings_run_connection
     end
   end
 end
