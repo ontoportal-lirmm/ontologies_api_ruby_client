@@ -99,7 +99,7 @@ module Faraday
         cache_write(last_modified_key_id(request_key), last_modified)
         cache_write(request_key, stored_obj)
       end
-      stored_obj
+      stored_obj.is_a?(Hash) && stored_obj.key?(:ld_obj) ? stored_obj[:ld_obj] : stored_obj
     end
 
     def cache_response(response_env, request_key)
