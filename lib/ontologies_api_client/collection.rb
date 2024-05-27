@@ -25,7 +25,7 @@ module LinkedData
         ##
         # Get all top-level links for the API
         def top_level_links
-          HTTP.get(LinkedData::Client.settings.rest_url)
+          @top_level_links||= HTTP.get(LinkedData::Client.settings.rest_url)
         end
 
         ##
@@ -75,16 +75,16 @@ module LinkedData
 
         ##
         # Find a resource by id
+        # @deprecated replace with "get"
         def find(id, params = {})
-          found = where do |obj|
-            obj.id.eql?(id)
-          end
-          found.first
+          [get(id, params)]
         end
 
         ##
         # Get a resource by id (this will retrieve it from the REST service)
         def get(id, params = {})
+          path = collection_path
+          id = "#{path}/#{id}" unless id.include?(path)
           HTTP.get(id, params)
         end
 
