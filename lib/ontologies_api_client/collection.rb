@@ -77,7 +77,7 @@ module LinkedData
         # Find a resource by id
         # @deprecated replace with "get"
         def find(id, params = {})
-          [get(id, params)]
+          get(id, params)
         end
 
         ##
