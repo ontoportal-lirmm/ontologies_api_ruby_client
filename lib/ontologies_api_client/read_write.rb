@@ -137,7 +137,7 @@ module LinkedData
         HTTP.get(self.id, invalidate_cache: true) if self.id
         session = Thread.current[:session]
         session[:last_updated] = Time.now.to_f if session
-        refresh_cache
+        # refresh_cache
       end
 
       def refresh_cache
