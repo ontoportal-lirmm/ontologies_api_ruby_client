@@ -2,7 +2,6 @@ require 'oj'
 require 'multi_json'
 require 'spawnling'
 
-require_relative 'ontologies_api_client/utils'
 require_relative 'ontologies_api_client/config'
 require_relative 'ontologies_api_client/http'
 require_relative 'ontologies_api_client/link_explorer'

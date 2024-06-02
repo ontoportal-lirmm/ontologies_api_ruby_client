@@ -50,17 +50,12 @@ module LinkedData
       end
 
       def initialize(options = {})
-        begin
-          values = options[:values]
-          if values.is_a?(Hash) && !values.empty?
-            create_attributes(values.keys)
-            populate_attributes(values)
-          end
-          create_attributes(self.class.attrs_always_present || [])
-        rescue => e
-          LOGGER.debug("\n\n ECCEZIONE! RUBY API - base.rb - initialize(options): #{e.message}\n#{e.backtrace.join("\n")}")
-          raise e
+        values = options[:values]
+        if values.is_a?(Hash) && !values.empty?
+          create_attributes(values.keys)
+          populate_attributes(values)
         end
+        create_attributes(self.class.attrs_always_present || [])
       end
 
       def id
