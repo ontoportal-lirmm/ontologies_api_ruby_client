@@ -119,4 +119,9 @@ class FederationTest < LinkedData::Client::TestCase
     refute_nil ontologies_federate_one.first.errors
     WebMock.disable!
   end
+
+
+  def test_federated_search
+    search_result = LinkedData::Client::Models::Class.search(federate: true, display_links: false, display_context: false)
+  end
 end

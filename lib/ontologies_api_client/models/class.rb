@@ -1,11 +1,15 @@
 require "cgi"
 require_relative "../base"
+require_relative "../request_federation"
+require 'parallel'
 
 module LinkedData
   module Client
     module Models
+
       class Class < LinkedData::Client::Base
         HTTP = LinkedData::Client::HTTP
+        include LinkedData::Client::RequestFederation
         @media_type = %w[http://www.w3.org/2002/07/owl#Class http://www.w3.org/2004/02/skos/core#Concept]
         @include_attrs = "prefLabel,definition,synonym,obsolete,hasChildren,inScheme,memberOf"
         @include_attrs_full = "prefLabel,definition,synonym,obsolete,properties,hasChildren,childre,inScheme,memberOf"
@@ -61,10 +65,20 @@ module LinkedData
 
         def self.search(*args)
           query = args.shift
+
           params = args.shift || {}
-          params[:q] = query
+          params = {
+            q: query,
+            is_collection: true,
+            federate: true
+          }
           raise ArgumentError, "You must provide a search query: Class.search(query: 'melanoma')" if query.nil? || !query.is_a?(String)
-          HTTP.post("/search", params)
+          
+          federated_get(params) do |url|
+            "#{url}/search"
+          end
+
+          #HTTP.get("/search", params)
         end
 
         def expanded?

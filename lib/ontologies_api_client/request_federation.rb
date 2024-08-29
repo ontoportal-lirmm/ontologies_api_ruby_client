@@ -20,7 +20,18 @@ module LinkedData
             end
           end
 
-          connections.flatten
+          connections = params[:is_collection] ? merge_collections(connections) : connections.flatten
+
+          connections
+        end
+
+        def merge_collections(connections)
+          merged_collections = []
+
+          connections.each do |connection|
+            merged_collections.concat(connection.collection)
+          end
+          merged_collections
         end
 
         def request_portals(params = {})
