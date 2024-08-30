@@ -67,18 +67,19 @@ module LinkedData
           query = args.shift
 
           params = args.shift || {}
-          params = {
-            q: query,
-            is_collection: true,
-            federate: true
-          }
-          raise ArgumentError, "You must provide a search query: Class.search(query: 'melanoma')" if query.nil? || !query.is_a?(String)
-          
-          federated_get(params) do |url|
-            "#{url}/search"
-          end
 
-          #HTTP.get("/search", params)
+          params[:q] = query
+          params[:is_collection] = true
+
+          raise ArgumentError, "You must provide a search query: Class.search(query: 'melanoma')" if query.nil? || !query.is_a?(String)
+
+          if params[:federate]
+            federated_get(params) do |url|
+              "#{url}/search"
+            end
+          else
+            HTTP.get("/search", params)
+          end
         end
 
         def expanded?
