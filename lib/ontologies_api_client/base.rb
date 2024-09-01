@@ -132,11 +132,16 @@ module LinkedData
           attr_exists = self.public_methods(false).include?(attr)
           unless attr_exists
             self.class.class_eval do
-              define_method attr.to_sym do
-                instance_variable_get("@#{attr}")
+              unless method_defined?(attr.to_sym)
+                define_method attr.to_sym do
+                  instance_variable_get("@#{attr}")
+                end
               end
-              define_method "#{attr}=" do |val|
-                instance_variable_set("@#{attr}", val)
+
+              unless method_defined?("#{attr}=".to_sym)
+                define_method "#{attr}=" do |val|
+                  instance_variable_set("@#{attr}", val)
+                end
               end
             end
           end
