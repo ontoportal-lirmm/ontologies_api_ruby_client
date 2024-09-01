@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = "2.2.0"
 
-  gem.add_dependency('activesupport')
+  gem.add_dependency('activesupport', '~> 7.0.4')
   gem.add_dependency('excon')
   gem.add_dependency('faraday')
   gem.add_dependency('faraday-excon', '~> 2.0.0')

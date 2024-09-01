@@ -120,8 +120,8 @@ class FederationTest < LinkedData::Client::TestCase
     WebMock.disable!
   end
 
-
   def test_federated_search
     search_result = LinkedData::Client::Models::Class.search(federate: true, display_links: false, display_context: false)
   end
 end
+
