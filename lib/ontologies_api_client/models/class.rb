@@ -73,10 +73,16 @@ module LinkedData
 
           raise ArgumentError, "You must provide a search query: Class.search(query: 'melanoma')" if query.nil? || !query.is_a?(String)
 
-          if params[:federate]
-            federated_get(params) do |url|
+          if params[:federate] || params[:portals]
+            search_result = federated_get(params) do |url|
               "#{url}/search"
             end
+
+            merged_collections = []
+            search_result.each do |result|
+              merged_collections.concat(result.collection)
+            end
+            merged_collections
           else
             HTTP.get("/search", params)
           end

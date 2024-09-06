@@ -20,19 +20,10 @@ module LinkedData
             end
           end
 
-          connections = params[:is_collection] ? merge_collections(connections) : connections.flatten
-
-          connections
+          connections.flatten
         end
 
-        def merge_collections(connections)
-          merged_collections = []
 
-          connections.each do |connection|
-            merged_collections.concat(connection.collection)
-          end
-          merged_collections
-        end
 
         def request_portals(params = {})
           federate = params.delete(:federate) || ::RequestStore.store[:federated_portals]
