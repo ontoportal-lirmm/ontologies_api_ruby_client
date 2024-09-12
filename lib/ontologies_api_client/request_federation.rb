@@ -11,11 +11,13 @@ module LinkedData
       module ClassMethods
         def federated_get(params = {}, &link)
           portals = request_portals(params)
+          main_thread_locals = Thread.current.keys.map { |key| [key, Thread.current[key]] }.to_h
 
           connections = Parallel.map(portals, in_threads: portals.size) do |conn|
+            main_thread_locals.each { |key, value| Thread.current[key] = value }
             begin
               HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), params, connection: conn)
-            rescue StandardError => e
+            rescue Exception => e
               [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/')) || conn.url_prefix}")]
             end
           end
