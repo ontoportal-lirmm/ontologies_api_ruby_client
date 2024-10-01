@@ -1,7 +1,6 @@
 require "cgi"
 require_relative "../base"
 require_relative "../request_federation"
-require 'parallel'
 
 module LinkedData
   module Client
