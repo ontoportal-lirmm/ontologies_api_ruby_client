@@ -68,26 +68,23 @@ module LinkedData
           params = args.shift || {}
 
           params[:q] = query
-          params[:is_collection] = true
 
           raise ArgumentError, "You must provide a search query: Class.search(query: 'melanoma')" if query.nil? || !query.is_a?(String)
 
-          if params[:federate] || params[:portals]
-            search_result = federated_get(params) do |url|
-              "#{url}/search"
-            end
-            merged_collections = {results: [], errors: []}
-            search_result.each do |result|
-              if result.collection
-                merged_collections[:results].concat(result.collection)
-              elsif result.errors
-                merged_collections[:errors] << result.errors
-              end
-            end
-            merged_collections
-          else
-            HTTP.get("/search", params)
+
+          search_result = federated_get(params) do |url|
+            "#{url}/search"
           end
+          merged_collections = {results: [], errors: []}
+          search_result.each do |result|
+            if result.collection
+              merged_collections[:results].concat(result.collection)
+            elsif result.errors
+              merged_collections[:errors] << result.errors
+            end
+          end
+          merged_collections
+
         end
 
         def expanded?
