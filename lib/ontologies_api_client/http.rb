@@ -69,7 +69,7 @@ module LinkedData
         begin
           begin
             response = nil
-            time = monitor_time(path, params, response.headers["X-Rack-Cache"]) do
+            time = Benchmark.realtime do
               response = connection.get do |req|
                 req.url path
                 req.params = params.dup
@@ -78,6 +78,8 @@ module LinkedData
                 req.headers[:invalidate_cache] = invalidate_cache
               end
             end
+
+            monitor_request(params, path, response, time)
             puts "Getting: #{path} with #{params} (t: #{time}s - cache: #{response.headers["X-Rack-Cache"]})" if $DEBUG_API_CLIENT
           rescue Exception => e
             params = Faraday::Utils.build_query(params)
@@ -165,17 +167,16 @@ module LinkedData
 
       private
 
-      def self.monitor_time(path, params, cache_hit, &block)
-        Benchmark.realtime do
-          if defined?(Rails) && RailsPerformance.enabled
-            RailsPerformance.measure("Getting: #{path} with #{params} - cache: #{cache_hit}", "API Call #{path}") do
-              block.call
-            end
-          else
-            block.call
-          end
-        end
+      def self.monitor_request(params, path, response, time)
+        RailsPerformance::Models::CustomRecord.new(
+          tag_name: "Getting: #{path} with #{params} - cache: (#{response.headers["X-Rack-Cache"]})",
+          namespace_name: "API call #{path}",
+          status: response.status,
+          duration: time,
+          datetime: Time.current.strftime(RailsPerformance::FORMAT),
+          datetimei: Time.current.to_i).save if defined?(Rails) && RailsPerformance.enabled
       end
+
 
       def self.custom_req(obj, file, file_attribute, req)
         req.headers['Content-Type'] = 'application/json'
