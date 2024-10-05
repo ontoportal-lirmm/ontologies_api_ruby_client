@@ -4,7 +4,7 @@ require 'digest'
 require 'ostruct'
 require 'benchmark'
 require 'active_support/cache'
-require 'rails_performance'
+require 'rails_performance' if defined?(Rails)
 ##
 # This monkeypatch makes OpenStruct act like Struct objects
 class OpenStruct
@@ -69,18 +69,15 @@ module LinkedData
         begin
           begin
             response = nil
-            time = Benchmark.realtime do
-              RailsPerformance.measure("Getting: #{path} with #{params} - cache: #{response.headers["X-Rack-Cache"]}", "API Call #{path}") do
-                response = connection.get do |req|
-                  req.url path
-                  req.params = params.dup
-                  req.options[:timeout] = 60
-                  req.headers.merge(headers)
-                  req.headers[:invalidate_cache] = invalidate_cache
-                end
+            time = monitor_time(path, params, response.headers["X-Rack-Cache"]) do
+              response = connection.get do |req|
+                req.url path
+                req.params = params.dup
+                req.options[:timeout] = 60
+                req.headers.merge(headers)
+                req.headers[:invalidate_cache] = invalidate_cache
               end
             end
-
             puts "Getting: #{path} with #{params} (t: #{time}s - cache: #{response.headers["X-Rack-Cache"]})" if $DEBUG_API_CLIENT
           rescue Exception => e
             params = Faraday::Utils.build_query(params)
@@ -167,6 +164,18 @@ module LinkedData
       end
 
       private
+
+      def self.monitor_time(path, params, cache_hit, &block)
+        Benchmark.realtime do
+          if defined?(Rails) && RailsPerformance.enabled
+            RailsPerformance.measure("Getting: #{path} with #{params} - cache: #{cache_hit}", "API Call #{path}") do
+              block.call
+            end
+          else
+            block.call
+          end
+        end
+      end
 
       def self.custom_req(obj, file, file_attribute, req)
         req.headers['Content-Type'] = 'application/json'
