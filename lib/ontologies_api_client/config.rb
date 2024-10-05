@@ -37,8 +37,8 @@ module LinkedData
 
     def config_connection(options = {})
       return if @settings_run_connection
-      store = options[:cache_store] || ActiveSupport::Cache::RedisCacheStore.new
-      @settings.conn = faraday_connection(@settings.rest_url, @settings.apikey, store)
+      store = options[:cache_store] || ActiveSupport::Cache::MemoryStore.new
+      @settings.conn = faraday_connection(@settings.rest_url, @settings.apikey, store, current_portal: true)
       @settings.federated_conn = @settings.federated_portals.map do |portal_name, portal_info|
         [portal_name, faraday_connection(portal_info[:api], portal_info[:apikey], store)]
       end.to_h
@@ -51,21 +51,24 @@ module LinkedData
     end
 
     private
-    def faraday_connection(url, apikey, store)
+    def faraday_connection(url, apikey, store, current_portal: false)
       Faraday.new(url.to_s.chomp('/')) do |faraday|
+
         if @settings.enable_long_request_log
           require_relative 'middleware/faraday-long-requests'
           faraday.use :long_requests
         end
 
-        require_relative 'middleware/faraday-user-apikey'
-        faraday.use :user_apikey
+        if current_portal
+          require_relative 'middleware/faraday-user-apikey'
+          faraday.use :user_apikey
 
-        require_relative 'middleware/faraday-slices'
-        faraday.use :ncbo_slices
+          require_relative 'middleware/faraday-slices'
+          faraday.use :ncbo_slices
 
-        require_relative 'middleware/faraday-last-updated'
-        faraday.use :last_updated
+          require_relative 'middleware/faraday-last-updated'
+          faraday.use :last_updated
+        end
 
         if @settings.cache
           begin
