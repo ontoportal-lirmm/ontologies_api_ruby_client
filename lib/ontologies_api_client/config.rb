@@ -37,7 +37,7 @@ module LinkedData
 
     def config_connection(options = {})
       return if @settings_run_connection
-      store = options[:cache_store] || ActiveSupport::Cache::MemoryStore.new
+      store = options[:cache_store] || ActiveSupport::Cache::RedisCacheStore.new
       @settings.conn = faraday_connection(@settings.rest_url, @settings.apikey, store)
       @settings.federated_conn = @settings.federated_portals.map do |portal_name, portal_info|
         [portal_name, faraday_connection(portal_info[:api], portal_info[:apikey], store)]
