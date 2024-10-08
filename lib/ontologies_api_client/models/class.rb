@@ -75,10 +75,10 @@ module LinkedData
           search_result = federated_get(params) do |url|
             "#{url}/search"
           end
-          merged_collections = {results: [], errors: []}
+          merged_collections = {collection: [], errors: []}
           search_result.each do |result|
             if result.collection
-              merged_collections[:results].concat(result.collection)
+              merged_collections[:collection].concat(result.collection)
             elsif result.errors
               merged_collections[:errors] << result.errors
             end
