@@ -119,4 +119,21 @@ class FederationTest < LinkedData::Client::TestCase
     refute_nil ontologies_federate_one.first.errors
     WebMock.disable!
   end
+
+  def test_federated_search
+    query = 'test'
+
+    time1 = Benchmark.realtime do
+      @search_results = LinkedData::Client::Models::Class.search(query)[:collection]
+    end
+
+    time2 = Benchmark.realtime do
+      @federated_search_results = LinkedData::Client::Models::Class.search(query, {federate: 'true'})[:collection]
+    end
+
+    puts "Search results: #{@search_results .length} in #{time1}s"
+    puts "Federated search results: #{@federated_search_results.length} in #{time2}s"
+
+    refute_equal @search_results.length, @federated_search_results.length
+  end
 end
