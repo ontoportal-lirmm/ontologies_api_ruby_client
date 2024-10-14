@@ -25,6 +25,8 @@ module LinkedData
           connections.flatten
         end
 
+
+
         def request_portals(params = {})
           federate = params.delete(:federate) || ::RequestStore.store[:federated_portals]
 
