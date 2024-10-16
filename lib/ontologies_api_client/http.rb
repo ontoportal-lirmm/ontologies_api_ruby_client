@@ -4,6 +4,7 @@ require 'digest'
 require 'ostruct'
 require 'benchmark'
 require 'active_support/cache'
+require 'rails_performance' if defined?(Rails)
 ##
 # This monkeypatch makes OpenStruct act like Struct objects
 class OpenStruct
@@ -77,6 +78,8 @@ module LinkedData
                 req.headers[:invalidate_cache] = invalidate_cache
               end
             end
+
+            monitor_request(params, path, response, time)
             puts "Getting: #{path} with #{params} (t: #{time}s - cache: #{response.headers["X-Rack-Cache"]})" if $DEBUG_API_CLIENT
           rescue Exception => e
             params = Faraday::Utils.build_query(params)
@@ -163,6 +166,17 @@ module LinkedData
       end
 
       private
+
+      def self.monitor_request(params, path, response, time)
+        RailsPerformance::Models::CustomRecord.new(
+          tag_name: "Getting: #{path} with #{params} - cache: (#{response.headers["X-Rack-Cache"]})",
+          namespace_name: "API call #{path}",
+          status: response.status,
+          duration: time,
+          datetime: Time.current.strftime(RailsPerformance::FORMAT),
+          datetimei: Time.current.to_i).save if defined?(Rails) && RailsPerformance.enabled
+      end
+
 
       def self.custom_req(obj, file, file_attribute, req)
         req.headers['Content-Type'] = 'application/json'
