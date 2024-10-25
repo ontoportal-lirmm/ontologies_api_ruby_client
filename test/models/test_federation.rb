@@ -124,14 +124,14 @@ class FederationTest < LinkedData::Client::TestCase
     query = 'test'
 
     time1 = Benchmark.realtime do
-      @search_results = LinkedData::Client::Models::Class.search(query)[:collection]
+      @search_results = LinkedData::Client::Models::Class.search(query).collection
     end
 
     time2 = Benchmark.realtime do
-      @federated_search_results = LinkedData::Client::Models::Class.search(query, {federate: 'true'})[:collection]
+      @federated_search_results = LinkedData::Client::Models::Class.search(query, {federate: 'true'}).collection
     end
 
-    puts "Search results: #{@search_results .length} in #{time1}s"
+    puts "Search results: #{@search_results.length} in #{time1}s"
     puts "Federated search results: #{@federated_search_results.length} in #{time2}s"
 
     refute_equal @search_results.length, @federated_search_results.length
