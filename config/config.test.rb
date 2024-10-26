@@ -25,7 +25,7 @@ LinkedData::Client.config do |config|
     #   color: '#1e2251',
     # },
     biodivportal: {
-      api: 'https://data.biodivportal.gfbio.org/',
+      api: 'https://data.biodivportal.gfbio.dev/',
       apikey: "47a57aa3-7b54-4f34-b695-dbb5f5b7363e",
       color: '#1e2251',
     }
