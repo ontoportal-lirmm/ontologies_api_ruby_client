@@ -83,7 +83,7 @@ module LinkedData
               merged_collections[:errors] << result.errors
             end
           end
-          merged_collections
+          OpenStruct.new(merged_collections)
 
         end
 
