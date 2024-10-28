@@ -23,5 +23,4 @@ Gem::Specification.new do |gem|
   gem.add_dependency('parallel')
   gem.add_dependency('request_store')
   gem.add_dependency('spawnling', '2.1.5')
-  gem.add_dependency('rails_performance')
 end
