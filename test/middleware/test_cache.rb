@@ -20,6 +20,10 @@ class FaradayObjectCacheTest < LinkedData::Client::TestCase
     end
   end
 
+  def teardown
+    WebMock.disable!
+  end
+
   def test_cache_hit_for_get_request
     body1, body2 = nil
     # First request should not hit the cache
@@ -128,14 +132,14 @@ class FaradayObjectCacheTest < LinkedData::Client::TestCase
 
   private
   def cached?(response)
-    response.env.response_headers['x-rack-cache'].eql?('hit')
+    response.env.response_headers['X-Rack-Cache'].eql?('hit')
   end
 
   def uncached?(response)
-    response.env.response_headers['x-rack-cache'].eql?('miss')
+    response.env.response_headers['X-Rack-Cache'].eql?('miss')
   end
 
   def refreshed?(response)
-    response.env.response_headers['x-rack-cache'].eql?('fresh')
+    response.env.response_headers['X-Rack-Cache'].eql?('fresh')
   end
 end

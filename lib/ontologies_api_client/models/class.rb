@@ -1,11 +1,14 @@
 require "cgi"
 require_relative "../base"
+require_relative "../request_federation"
 
 module LinkedData
   module Client
     module Models
+
       class Class < LinkedData::Client::Base
         HTTP = LinkedData::Client::HTTP
+        include LinkedData::Client::RequestFederation
         @media_type = %w[http://www.w3.org/2002/07/owl#Class http://www.w3.org/2004/02/skos/core#Concept]
         @include_attrs = "prefLabel,definition,synonym,obsolete,hasChildren,inScheme,memberOf"
         @include_attrs_full = "prefLabel,definition,synonym,obsolete,properties,hasChildren,childre,inScheme,memberOf"
@@ -61,10 +64,27 @@ module LinkedData
 
         def self.search(*args)
           query = args.shift
+
           params = args.shift || {}
+
           params[:q] = query
+
           raise ArgumentError, "You must provide a search query: Class.search(query: 'melanoma')" if query.nil? || !query.is_a?(String)
-          HTTP.post("/search", params)
+
+
+          search_result = federated_get(params) do |url|
+            "#{url}/search"
+          end
+          merged_collections = {collection: [], errors: []}
+          search_result.each do |result|
+            if result.collection
+              merged_collections[:collection].concat(result.collection)
+            elsif result.errors
+              merged_collections[:errors] << result.errors
+            end
+          end
+          OpenStruct.new(merged_collections)
+
         end
 
         def expanded?
