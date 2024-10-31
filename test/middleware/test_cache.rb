@@ -19,11 +19,13 @@ class FaradayObjectCacheTest < LinkedData::Client::TestCase
       faraday.adapter :excon
     end
   end
-
+  
+  
   def teardown
     WebMock.disable!
   end
-
+  
+  
   def test_cache_hit_for_get_request
     body1, body2 = nil
     # First request should not hit the cache

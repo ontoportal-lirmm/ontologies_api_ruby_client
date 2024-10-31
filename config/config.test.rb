@@ -30,4 +30,5 @@ LinkedData::Client.config do |config|
       color: '#1e2251',
     }
   }
+
 end
