@@ -126,6 +126,7 @@ module LinkedData
         else
           recursive_struct(load_json(response.body))
         end
+
       end
 
       def self.put(path, obj)
