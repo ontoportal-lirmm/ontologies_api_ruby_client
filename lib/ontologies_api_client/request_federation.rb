@@ -57,10 +57,7 @@ module LinkedData
 
 
         def portal_name_from_id(id)
-          LinkedData::Client::HTTP.federated_conn.each do |portal_name, value|
-            return portal_name if value.url_prefix.to_s.eql?(id)
-          end
-          return ''
+          LinkedData::Client::HTTP.federated_conn.find { |_, value| value.url_prefix.to_s.eql?(id) }&.first || ''
         end
       end
 
