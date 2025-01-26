@@ -67,7 +67,7 @@ module LinkedData
       end
 
       def self.explore(id)
-        path = collection_path
+        path = self.respond_to?(:collection_path) ? collection_path : ''
         id = "#{path}/#{id}" unless id.include?(path)
         inst = self.new(values: {id: id})
         LinkedData::Client::LinkExplorer.new({}, inst)

@@ -11,14 +11,18 @@ module LinkedData
         @instance = instance
       end
 
+
+      def get(params = {})
+        get_link(@instance.id, params)
+      end
+
       def method_missing(meth, *args, &block)
         if combined_links.key?(meth.to_s)
           explore_link(meth, *args)
         elsif meth == :batch
           explore_link(args)
         elsif !@instance.id.blank?
-          link = "#{@instance.id}/#{meth}"
-          get_link(link, args.first)
+          forward_explore(meth, *args)
         else
           super
         end
@@ -55,6 +59,13 @@ module LinkedData
       end
 
       private
+
+      def forward_explore(meth, *args)
+        sub_id = Array(args).find { |x| x.is_a?(String) } || ''
+        link = "#{@instance.id}/#{meth}/#{CGI.escape(sub_id)}".chomp('/')
+        @instance.id = link
+        LinkExplorer.new(@links, @instance)
+      end
 
       def get_link(link, params, replacements = [], full_attributes = {})
         url = replace_template_elements(link.to_s, replacements)
