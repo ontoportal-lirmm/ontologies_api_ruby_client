@@ -29,7 +29,8 @@ module LinkedData
         ##
         # Get all top-level links for the API
         def top_level_links(link = LinkedData::Client.settings.rest_url)
-          HTTP.get(link)
+          @top_level_links ||= {}
+          @top_level_links[link] ||= HTTP.get(link)
         end
 
         ##
