@@ -17,6 +17,14 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    actionmailer (0.6.1)
+      actionpack (>= 0.9.5)
+    actionpack (1.4.0)
+    activemodel (7.0.8.6)
+      activesupport (= 7.0.8.6)
+    activerecord (7.0.8.6)
+      activemodel (= 7.0.8.6)
+      activesupport (= 7.0.8.6)
     activesupport (7.0.8.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
@@ -59,6 +67,11 @@ GEM
       method_source (~> 1.0)
     public_suffix (5.1.1)
     rack (3.1.8)
+    rails (0.9.5)
+      actionmailer (>= 0.6.1)
+      actionpack (>= 1.4.0)
+      activerecord (>= 1.6.0)
+      rake (>= 0.4.15)
     rake (13.2.1)
     request_store (1.7.0)
       rack (>= 1.4)
@@ -81,8 +94,10 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activesupport
   ontologies_api_client!
   pry
+  rails
   rake
   test-unit
   webmock
