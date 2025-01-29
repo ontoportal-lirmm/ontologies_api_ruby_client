@@ -7,15 +7,13 @@ require 'webmock'
 
 WebMock.allow_net_connect!
 
-module Rails
-  def self.cache
-    @cache ||= ActiveSupport::Cache::MemoryStore.new
-  end
-end
+# Set up a cache for testing
+CACHE = ActiveSupport::Cache::MemoryStore.new
 
 module LinkedData
   module Client
     class TestCase < Test::Unit::TestCase
+      # You can use CACHE in your tests if needed
     end
   end
 end
