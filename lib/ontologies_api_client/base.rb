@@ -66,6 +66,13 @@ module LinkedData
         @type
       end
 
+      def self.explore(id)
+        path = self.respond_to?(:collection_path) ? collection_path : ''
+        id = "#{path}/#{id}" unless id.include?(path)
+        inst = self.new(values: {id: id})
+        LinkedData::Client::LinkExplorer.new({}, inst)
+      end
+
       ##
       # Retrieve a set of data using a link provided on an object
       # This instantiates an instance of this class and uses
