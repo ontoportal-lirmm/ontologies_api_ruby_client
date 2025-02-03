@@ -58,7 +58,7 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (5.1.1)
-    rack (3.1.8)
+    rack (3.1.9)
     rake (13.2.1)
     request_store (1.7.0)
       rack (>= 1.4)
@@ -81,7 +81,6 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  activesupport (~> 7.0.8)
   ontologies_api_client!
   pry
   rake
