@@ -9,7 +9,7 @@ module LinkedData
         @media_type = "http://data.bioontology.org/metadata/Note"
 
         def deletable?(user)
-          false
+          !user.nil? && user.admin? # Administrators can delete notes
         end
 
         def uuid
