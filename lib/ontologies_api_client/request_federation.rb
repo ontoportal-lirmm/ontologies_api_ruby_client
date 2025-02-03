@@ -1,11 +1,8 @@
 require 'active_support/core_ext/hash'
-require 'active_support/cache'
 
 module LinkedData
   module Client
     module RequestFederation
-
-      CACHE = ActiveSupport::Cache::MemoryStore.new
 
       def self.included(base)
         base.extend(ClassMethods)
@@ -20,8 +17,8 @@ module LinkedData
             portal_name = portal_name_from_id(conn.url_prefix.to_s)
             portal_status = true
 
-            unless CACHE.read("federation_portal_up_#{portal_name}").nil?
-              portal_status = CACHE.read("federation_portal_up_#{portal_name}")
+            unless Rails.cache.read("federation_portal_up_#{portal_name}").nil?
+              portal_status = Rails.cache.read("federation_portal_up_#{portal_name}")
             end
 
             unless portal_status
@@ -32,7 +29,7 @@ module LinkedData
             begin
               HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), params, connection: conn)
             rescue Exception => e
-              CACHE.write("federation_portal_up_#{portal_name}", false, expires_in: 10.minutes)
+              Rails.cache.write("federation_portal_up_#{portal_name}", false, expires_in: 10.minutes)
               [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/')) || conn.url_prefix}")]
             end
           end

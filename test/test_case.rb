@@ -10,7 +10,11 @@ require 'webmock'
 WebMock.allow_net_connect!
 
 Logger = ::Logger unless defined?(Logger)
-CACHE = ActiveSupport::Cache::MemoryStore.new
+module Rails
+  def self.cache
+    @cache ||= ActiveSupport::Cache::MemoryStore.new
+  end
+end
 
 module LinkedData
   module Client
