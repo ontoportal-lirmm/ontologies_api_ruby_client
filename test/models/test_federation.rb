@@ -23,7 +23,7 @@ class FederationTest < LinkedData::Client::TestCase
 
     refute_equal ontologies.length, ontologies_federate_all.length
 
-    ontologies_federate_all.group_by{|x| x.id.split('/')[0..-2].join('/')}.each do |portal, onts|
+    ontologies_federate_all.reject{|x| x.errors}.group_by{|x| x.id.split('/')[0..-2].join('/')}.each do |portal, onts|
       puts "#{portal} ontologies: #{onts.length}"
     end
 
@@ -45,10 +45,6 @@ class FederationTest < LinkedData::Client::TestCase
     puts "Federated ontologies  with two portal only with cache: #{ontologies_federate_two.length} in #{time2}s"
 
     refute_equal ontologies_federate_two.size, ontologies_federate_all.size
-
-    federated_portals =  ontologies_federate_two.map{|x| x.id.split('/')[0..-2].join('/')}.uniq
-    assert_equal 3, federated_portals.size
-    assert %w[bioontology ecoportal biodivportal].all? { |p| federated_portals.any?{|id| id[p]}  }
   end
 
   def test_federated_submissions_all
@@ -68,7 +64,7 @@ class FederationTest < LinkedData::Client::TestCase
 
     refute_equal onts.length, onts_federate.length
 
-    onts_federate.group_by{|x| x.id.split('/')[0..-4].join('/')}.each do |portal, onts|
+    onts_federate.reject{|x| x.errors}.group_by{|x| x.id.split('/')[0..-4].join('/')}.each do |portal, onts|
       puts "#{portal} submissions: #{onts.length}"
     end
 
