@@ -27,7 +27,8 @@ module LinkedData
 
             main_thread_locals.each { |key, value| Thread.current[key] = value }
             begin
-              HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), params, connection: conn)
+              portal_params = params[portal_name.to_s.downcase] || params
+              HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), portal_params, connection: conn)
             rescue Exception => e
               Rails.cache.write("federation_portal_up_#{portal_name}", false, expires_in: 10.minutes)
               [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/')) || conn.url_prefix}")]
@@ -39,10 +40,14 @@ module LinkedData
 
 
 
-        def request_portals(params = {})
-          federate = params.delete(:federate) || ::RequestStore.store[:federated_portals]
+        def federated_portals_names(params = {})
+          params[:federate] || ::RequestStore.store[:federated_portals]
+        end
 
+        def request_portals(params = {})
+          federate = federated_portals_names(params)
           portals = [LinkedData::Client::HTTP.conn]
+          params.delete(:federate)
 
           if federate.is_a?(Array)
             portals += LinkedData::Client::HTTP.federated_conn
