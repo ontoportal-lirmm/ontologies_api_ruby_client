@@ -32,6 +32,7 @@ module LinkedData
               HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), portal_params, connection: conn)
             rescue Exception => e
               HTTP.log("Error in federation #{portal_name} is down status cached for 10 minutes")
+              Rails.cache.write("federation_portal_up_#{portal_name}", false, expires_in: 10.minutes) unless internal_call?(conn)
               [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/')) || conn.url_prefix}")]
             end
           end
@@ -61,6 +62,9 @@ module LinkedData
           portals
         end
 
+        def internal_call?(conn)
+          conn.url_prefix.to_s.start_with?(LinkedData::Client::HTTP.conn.url_prefix.to_s)
+        end
 
         def portal_name_from_id(id)
           LinkedData::Client::HTTP.federated_conn.find { |_, value| value.url_prefix.to_s.eql?(id) }&.first || ''
