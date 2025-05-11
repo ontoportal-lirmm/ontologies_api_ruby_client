@@ -77,7 +77,7 @@ module LinkedData
                 req.headers[:invalidate_cache] = invalidate_cache
               end
             end
-            puts "Getting: #{path} with #{params} (t: #{time}s - cache: #{response.headers["X-Rack-Cache"]})" if $DEBUG_API_CLIENT
+            log "Getting: #{path} with #{params} (t: #{time}s - cache: #{response.headers["X-Rack-Cache"]})" if $DEBUG_API_CLIENT
           rescue Exception => e
             params = Faraday::Utils.build_query(params)
             path << "?" unless params.empty? || path.include?("?")
@@ -95,7 +95,7 @@ module LinkedData
             obj = recursive_struct(load_json(response.body))
           end
         rescue StandardError => e
-          puts "Problem getting #{path}" if $DEBUG_API_CLIENT
+          log "Problem getting #{path}"
           raise e
         end
         obj
@@ -151,7 +151,7 @@ module LinkedData
       end
 
       def self.delete(id)
-        puts "Deleting #{id}" if $DEBUG_API_CLIENT
+        log "Deleting #{id}" if $DEBUG_API_CLIENT
         response = conn.delete id
         raise StandardError, response.body if response.status >= 500
 
@@ -162,6 +162,9 @@ module LinkedData
         recursive_struct(load_json(json))
       end
 
+      def self.log(message)
+        puts message if $DEBUG_API_CLIENT
+      end
       private
 
       def self.custom_req(obj, file, file_attribute, req)
