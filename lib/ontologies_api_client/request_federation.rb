@@ -22,6 +22,7 @@ module LinkedData
             end
 
             unless portal_status
+              HTTP.log("Error in federation #{portal_name} is down status cached for 10 minutes")
               next [OpenStruct.new(errors: "Problem retrieving #{portal_name}")]
             end
 
@@ -30,7 +31,7 @@ module LinkedData
               portal_params = params[portal_name.to_s.downcase] || params
               HTTP.get(link.call(conn.url_prefix.to_s.chomp('/')), portal_params, connection: conn)
             rescue Exception => e
-              Rails.cache.write("federation_portal_up_#{portal_name}", false, expires_in: 10.minutes)
+              HTTP.log("Error in federation #{portal_name} is down status cached for 10 minutes")
               [OpenStruct.new(errors: "Problem retrieving #{link.call(conn.url_prefix.to_s.chomp('/')) || conn.url_prefix}")]
             end
           end
