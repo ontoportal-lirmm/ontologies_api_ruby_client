@@ -9,3 +9,5 @@ config/config.rb
 
 # Specific to rbenv
 .ruby-version
+
+./vs

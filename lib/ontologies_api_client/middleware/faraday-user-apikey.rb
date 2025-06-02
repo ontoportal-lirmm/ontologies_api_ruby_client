@@ -7,11 +7,19 @@ module Faraday
     end
 
     def call(env)
-      user = Thread.current[:session] && Thread.current[:session][:user] ? Thread.current[:session][:user] : nil
-      if user
+      bearer_token = Thread.current[:ontologies_api_client_token]
+
+      if bearer_token
         headers = env[:request_headers]
-        headers["Authorization"] = headers["Authorization"] + "&userapikey=" + user.apikey
+        headers["Authorization"] = "Bearer #{bearer_token}"
         env[:request_headers] = headers
+      else
+        user = Thread.current[:session] && Thread.current[:session][:user] ? Thread.current[:session][:user] : nil
+        if user
+          headers = env[:request_headers]
+          headers["Authorization"] = headers["Authorization"] + "&userapikey=" + user.apikey
+          env[:request_headers] = headers
+        end
       end
       @app.call(env)
     end
